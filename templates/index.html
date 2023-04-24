@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Captioning</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+      }
+      header {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 20px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+      label {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+      input[type="file"] {
+        margin-bottom: 20px;
+      }
+      #image-preview {
+        display: none;
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+      }
+      #captions {
+        margin-top: 20px;
+      }
+      #captions p {
+        font-size: 16px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Image Captioning</h1>
+    </header>
+    <div>
+      <form action="/" method="post" enctype="multipart/form-data">
+        <label for="file">Select an image:</label>
+        <input type="file" id="file" name="file"><br>
+        <img id="image-preview">
+        <label for="num_captions">Number of captions:</label>
+        <input type="number" id="num_captions" name="num_captions" value="1"><br>
+        <button type="submit">Generate Captions</button>
+      </form>
+      <div id="captions"></div>
+    </div>
+    <script>
+      var form = document.querySelector("form");
+      form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        var file = document.querySelector("#file").files[0];
+        var num_captions = document.querySelector("#num_captions").value;
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("num_captions", num_captions);
+        fetch("/", {method: "POST", body: formData})
+          .then(response => response.json())
+          .then(data => {
+            var captions = data.captions;
+            var captionsDiv = document.querySelector("#captions");
+            captionsDiv.innerHTML = "";
+            captions.forEach(caption => {
+              var p = document.createElement("p");
+              p.innerText = caption;
+              captionsDiv.appendChild(p);
+            });
+          });
+        var reader = new FileReader();
+        reader.onload = function(event) {
+          var img = document.querySelector("#image-preview");
+          img.src = event.target.result;
+          img.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      });
+    </script>
+  </body>
+</html>
